@@ -1,0 +1,45 @@
+#cloud-config
+
+---
+hostname: VM_HOST 
+users:
+  - name: core
+    passwd: PASSWD 
+    groups:
+      - sudo
+      - docker
+  - name: root
+    passwd: PASSWD 
+coreos:
+  units:
+    - name: setup-network-environment.service
+      command: start
+      content: |
+        [Unit]
+        Description=Setup networking environment
+        Documentation=https://github.com/kelseyhightower/setup-network-environment
+        Requires=network-online.target
+        After=network-online.target
+
+        [Service]
+        ExecStartPre=-/usr/bin/mkdir -p /opt/bin
+        ExecStartPre=-/usr/bin/wget -N -P /opt/bin https://github.com/kelseyhightower/setup-network-environment/releases/download/v1.0.0/setup-network-environment
+        ExecStartPre=/usr/bin/chmod +x /opt/bin/setup-network-environment
+        ExecStart=/opt/bin/setup-network-environment
+        RemainAfterExit=yes
+        Type=oneshot
+    - name: etcd.service
+      command: start
+      content: |
+        [Unit]
+        Description=etcd
+        Requires=setup-network-environment.service
+        After=setup-network-environment.service
+ 
+        [Service]
+        ConditionFileNotEmpty=/etc/network-environment
+        PermissionsStartOnly=true
+        EnvironmentFile=/etc/network-environment
+        ExecStart=/usr/bin/etcd -vv -name etcd -bind-addr 0.0.0.0 -addr ${DEFAULT_IPV4}:4001 -peer-addr ${DEFAULT_IPV4}:7001 -data-dir /var/lib/etcd -max-retry-attempts 20
+        Restart=always
+        RestartSec=10s
