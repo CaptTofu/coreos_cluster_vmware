@@ -16,6 +16,7 @@ do
   cp ${core_host}_cloud_init.yaml /tmp/new-drive/openstack/latest/user_data
   mv ${work_dir}/${core_host}.iso ${work_dir}/${core_host}.iso.bak
   hdiutil makehybrid -iso -joliet -joliet-volume-name "config-2" -o ${work_dir}/${core_host}.iso /tmp/new-drive
-  sudo vmrun start ${core_host}.vmx
+  vmrun start ${core_host}.vmx
   sleep 10
+  vmrun getGuestIPAddress ${core_host}.vmx
 done

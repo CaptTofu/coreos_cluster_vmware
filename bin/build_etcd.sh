@@ -12,5 +12,6 @@ cp ${etcd_hostname}_cloud_init.yaml /tmp/new-drive/openstack/latest/user_data
 mv ${work_dir}/${etcd_hostname}.iso ${work_dir}/${etcd_hostname}.iso.bak
 hdiutil makehybrid -iso -joliet -joliet-volume-name "config-2" -o ${work_dir}/${etcd_hostname}.iso /tmp/new-drive
 
-sudo vmrun start ${etcd_hostname}.vmx
-#sudo vmrun getGuestIPAddress ${etcd_hostname}.vmx
+vmrun start ${etcd_hostname}.vmx
+sleep 10
+vmrun getGuestIPAddress ${etcd_hostname}.vmx
